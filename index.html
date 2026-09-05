@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="查看地区高中成绩概况、学校比较与选科比例。" />
+    <title>地区高中学业情况看板</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="header-copy">
+        <p class="eyebrow">E1—E8 学业数据</p>
+        <h1>地区高中学业情况看板</h1>
+        <p class="header-note">从地区、考试、学校和选科四个角度了解这几所高中的学业情况</p>
+      </div>
+      <div class="header-badge"><span>最新参考考试</span><strong>E8 高三二模</strong></div>
+    </header>
+
+    <main>
+      <nav class="section-nav" aria-label="看板栏目">
+        <button class="nav-card active" type="button" data-view="overview" aria-current="page"><span>01</span><strong>地区总览</strong><small>先看整体情况</small></button>
+        <button class="nav-card" type="button" data-view="performance"><span>02</span><strong>成绩表现</strong><small>查看学校与科目</small></button>
+        <button class="nav-card" type="button" data-view="comparison"><span>03</span><strong>学校比较</strong><small>横向查看各校</small></button>
+        <button class="nav-card" type="button" data-view="choices"><span>04</span><strong>选科比例</strong><small>了解选科结构</small></button>
+        <button class="nav-card" type="button" data-view="method"><span>05</span><strong>数据说明</strong><small>了解统计口径</small></button>
+      </nav>
+
+      <p id="statusText" class="status-text">正在读取网页数据……</p>
+
+      <section class="dashboard-view active" id="view-overview" data-panel="overview">
+        <div class="view-heading">
+          <div><p class="section-kicker">地区总览</p><h2>这组数据覆盖了什么？</h2></div>
+          <p>以最新的 E8 高三二模作为当前快照，同时展示八场考试的参考人数。</p>
+        </div>
+        <section class="card-grid" aria-label="地区概览指标">
+          <article class="metric-card"><span>覆盖学校</span><strong id="overviewSchoolCount">—</strong><small>所高中</small></article>
+          <article class="metric-card"><span>E8 参考学生</span><strong id="overviewStudentCount">—</strong><small>人</small></article>
+          <article class="metric-card"><span>考试数据</span><strong id="overviewExamCount">—</strong><small>场</small></article>
+          <article class="metric-card accent-card"><span>人数最多的选科组合</span><strong id="overviewTopChoice">—</strong><small id="overviewTopChoiceShare">—</small></article>
+        </section>
+        <article class="reader-summary" id="overviewSummary"></article>
+        <section class="chart-grid overview-grid">
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>E8 三门主科平均分</h3><p>语文、数学和英语满分均为 150 分，可直接横向查看。</p></div></div>
+            <div id="coreAverageChart" class="svg-chart"></div>
+          </article>
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>各场考试参考人数</h3><p>用于了解不同考试覆盖的数据规模。</p></div></div>
+            <div id="examSizeChart" class="svg-chart"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="dashboard-view" id="view-performance" data-panel="performance" hidden>
+        <div class="view-heading">
+          <div><p class="section-kicker">成绩表现</p><h2>某所学校、某场考试、某门科目表现如何？</h2></div>
+          <p>选择条件后，页面会同步更新成绩概况、分布和历次平均分。</p>
+        </div>
+        <section class="filter-panel" aria-label="成绩表现筛选条件">
+          <div class="filter-item"><label for="performanceSchool">学校</label><select id="performanceSchool"></select></div>
+          <div class="filter-item"><label for="performanceExam">考试</label><select id="performanceExam"></select></div>
+          <div class="filter-item"><label for="performanceSubject">科目</label><select id="performanceSubject"></select></div>
+          <button id="performanceReset" type="button">恢复默认</button>
+        </section>
+        <p id="performanceContext" class="context-line"></p>
+        <section class="card-grid" aria-label="当前成绩概况">
+          <article class="metric-card"><span>参考人数</span><strong id="performanceStudents">—</strong><small>人</small></article>
+          <article class="metric-card"><span>平均分</span><strong id="performanceMean">—</strong><small>当前考试原始分</small></article>
+          <article class="metric-card"><span>成绩中点</span><strong id="performanceMedian">—</strong><small>一半学生高于该分数</small></article>
+          <article class="metric-card"><span>中间 50% 成绩区间</span><strong id="performanceMiddle">—</strong><small>第25百分位至第75百分位</small></article>
+        </section>
+        <article class="reader-summary" id="performanceSummary"></article>
+        <section class="chart-grid">
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>当前成绩分布</h3><p>柱越高，表示该分数区间内的学生越多。</p></div></div>
+            <div id="distributionChart" class="svg-chart"></div>
+          </article>
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>历次考试平均分</h3><p id="trendNote">不同考试难度不同，折线只用于观察，不代表绝对进步幅度。</p></div></div>
+            <div id="trendChart" class="svg-chart"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="dashboard-view" id="view-comparison" data-panel="comparison" hidden>
+        <div class="view-heading">
+          <div><p class="section-kicker">学校比较</p><h2>同一场考试中，各校表现有什么差异？</h2></div>
+          <p>固定考试和科目后按学校平均分比较，人数同时列出，便于判断统计规模。</p>
+        </div>
+        <section class="filter-panel compact-filter" aria-label="学校比较筛选条件">
+          <div class="filter-item"><label for="comparisonExam">考试</label><select id="comparisonExam"></select></div>
+          <div class="filter-item"><label for="comparisonSubject">科目</label><select id="comparisonSubject"></select></div>
+          <button id="comparisonReset" type="button">恢复默认</button>
+        </section>
+        <p id="comparisonContext" class="context-line"></p>
+        <section class="card-grid" aria-label="学校比较概况">
+          <article class="metric-card"><span>有成绩记录的学校</span><strong id="comparisonSchools">—</strong><small>所</small></article>
+          <article class="metric-card"><span>地区平均分</span><strong id="comparisonRegionMean">—</strong><small>当前考试与科目</small></article>
+          <article class="metric-card"><span>最高学校平均分</span><strong id="comparisonTopMean">—</strong><small id="comparisonTopSchool">—</small></article>
+          <article class="metric-card"><span>学校平均分差距</span><strong id="comparisonGap">—</strong><small>最高与最低学校之差</small></article>
+        </section>
+        <article class="reader-summary" id="comparisonSummary"></article>
+        <article class="chart-card ranking-card">
+          <div class="chart-heading"><div><h3>学校平均分排序</h3><p>图中同时标出每所学校的参考人数。</p></div></div>
+          <div id="rankingChart" class="svg-chart"></div>
+        </article>
+        <article class="table-card">
+          <div class="table-heading"><h3>学校统计明细</h3><p>点击表头可重新排序。</p></div>
+          <div class="table-wrap">
+            <table id="comparisonTable">
+              <thead><tr><th data-key="school">学校</th><th data-key="n">参考人数</th><th data-key="mean">平均分</th><th data-key="median">成绩中点</th><th data-key="q1">第25百分位</th><th data-key="q3">第75百分位</th><th data-key="max">最高分</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard-view" id="view-choices" data-panel="choices" hidden>
+        <div class="view-heading">
+          <div><p class="section-kicker">选科比例</p><h2>学生主要选择了哪些科目组合？</h2></div>
+          <p>以 E8 高三二模中实际参加的三门选考科目为准，可查看地区或单所学校。</p>
+        </div>
+        <section class="filter-panel choice-filter" aria-label="选科比例筛选条件">
+          <div class="filter-item"><label for="choiceSchool">查看范围</label><select id="choiceSchool"></select></div>
+          <button id="choiceReset" type="button">查看地区整体</button>
+        </section>
+        <p id="choiceContext" class="context-line"></p>
+        <section class="card-grid" aria-label="选科概况">
+          <article class="metric-card"><span>选科统计人数</span><strong id="choiceStudents">—</strong><small>人</small></article>
+          <article class="metric-card"><span>选科组合种类</span><strong id="choiceComboCount">—</strong><small>种</small></article>
+          <article class="metric-card accent-card"><span>人数最多的组合</span><strong id="choiceLeadingCombo">—</strong><small>首选组合</small></article>
+          <article class="metric-card"><span>首选组合占比</span><strong id="choiceLeadingShare">—</strong><small>占当前范围人数</small></article>
+        </section>
+        <article class="reader-summary" id="choiceSummary"></article>
+        <section class="choice-grid">
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>选科组合比例</h3><p>展示前五种组合，其余合并为“其他组合”。</p></div></div>
+            <div id="choicePie" class="pie-chart"></div>
+          </article>
+          <article class="chart-card">
+            <div class="chart-heading"><div><h3>六门选考科目选择率</h3><p>同一名学生会计入其选择的三门科目。</p></div></div>
+            <div id="electivePopularityChart" class="svg-chart"></div>
+          </article>
+        </section>
+        <article class="table-card">
+          <div class="table-heading"><h3>选科组合明细</h3><p>按人数从高到低排列。</p></div>
+          <div class="table-wrap"><table id="choiceTable"><thead><tr><th>选科组合</th><th>人数</th><th>比例</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="dashboard-view" id="view-method" data-panel="method" hidden>
+        <div class="view-heading">
+          <div><p class="section-kicker">数据说明</p><h2>如何正确理解这个看板？</h2></div>
+          <p>这些说明帮助读者避免对考试分数和学校排序作过度解释。</p>
+        </div>
+        <section class="method-grid">
+          <article class="method-card"><span>01</span><h3>成绩口径</h3><p>单科展示原始成绩；“成绩中点”是中位数，“中间50%成绩区间”反映多数学生主要分布在哪个范围。</p></article>
+          <article class="method-card"><span>02</span><h3>跨考试趋势</h3><p>试卷难度会变化，因此折线表示历次考试的观察结果，不应只凭一次升降判断学习进步或退步。</p></article>
+          <article class="method-card"><span>03</span><h3>总分说明</h3><p>E1、E2 的总分科目构成与后续考试不同。总分趋势从 E3 开始展示，避免把不同口径的总分直接相连。</p></article>
+          <article class="method-card"><span>04</span><h3>学校比较</h3><p>学校排序是同一考试、同一科目下的描述性比较，同时受到生源、参考人数等因素影响，不能单独等同于教学质量。</p></article>
+          <article class="method-card"><span>05</span><h3>选科说明</h3><p>选科比例以 E8 高三二模实际参加的三门选考科目组合确定，反映的是该次考试中的选科结构。</p></article>
+          <article class="method-card"><span>06</span><h3>信息保护</h3><p>网页数据按地区和学校汇总，不包含姓名、考号，也不提供单个学生的成绩记录。</p></article>
+        </section>
+      </section>
+    </main>
+
+    <footer><p>地区高中学业情况看板 · 数据范围：E1—E8</p></footer>
+    <template id="emptyTemplate"><p class="empty-state">当前条件下没有可展示的数据。</p></template>
+    <script src="js/app.js"></script>
+  </body>
+</html>
